@@ -4,18 +4,25 @@ DetectAssistant.prototype.setup = function() {
 	
 	this.gctx = document.getElementById('waveform-canvas').getContext('2d');
 	
-	this.controller.setupWidget("startButton", 
-		{
-		 	type: Mojo.Widget.activityButton
-    	},
-    	{
-			label : "Start",
+	this.controller.setupWidget("recordButton", 
+		{},
+    	this.recordModel = {
+			label : "Go!",
          	disabled: false,
 		 	buttonClass: 'affirmative'
      	}
     );
+    this.controller.setupWidget("spinner",
+		{
+	    	spinnerSize: "large"
+	  	},
+	  	this.spinnerModel = {
+			spinning: false
+	  	}
+	); 
+
 	this.controller.setupWidget("playButton",
-        this.attributes = {
+        {
 			type: Mojo.Widget.activityButton
 		},
         this.playModel = {
@@ -27,7 +34,7 @@ DetectAssistant.prototype.setup = function() {
 	this.startCallback = this.startCallback.bind(this);
 	this.playCallback = this.playCallback.bind(this);
 	this.controller.listen(this.controller.get('playButton'), Mojo.Event.tap, this.playCallback);
-	this.controller.listen(this.controller.get('startButton'), Mojo.Event.tap, this.startCallback);
+	this.controller.listen(this.controller.get('recordButton'), Mojo.Event.tap, this.startCallback);
 	
 	var mediaCaptureLib = MojoLoader.require({
 		name: "mediacapture",
@@ -47,30 +54,15 @@ DetectAssistant.prototype.setup = function() {
 	}
 };
 
-
-DetectAssistant.prototype.stopCallback = function(event) {
-	this.controller.get('area-to-update1').innerText = 'Recording finished, press play';
-	this.controller.get('startButton').mojo.deactivate();
-	
-	this.playModel.disabled = false;
-	this.controller.modelChanged(this.playModel);
-	
-	this.audioRecorder.stopAudioCapture();
-	this.stopGrapher();
-
-	//var filePath = "/media/internal/audio/recording" + this.randomInt +  ".wav";
-	//@TODO: Send file to plugin
-};
-
 DetectAssistant.prototype.activate = function(event) {
 	this.controller.listen(this.controller.get('playButton'), Mojo.Event.tap, this.playCallback);
-	this.controller.listen(this.controller.get('startButton'), Mojo.Event.tap, this.startCallback);
+	this.controller.listen(this.controller.get('recordButton'), Mojo.Event.tap, this.startCallback);
 };
 
 DetectAssistant.prototype.deactivate = function(event) {
 	/* remove all event handlers*/
 	this.controller.stopListening(this.controller.get('playButton'), Mojo.Event.tap, this.playCallback);
-	this.controller.stopListening(this.controller.get('startButton'), Mojo.Event.tap, this.startCallback);
+	this.controller.stopListening(this.controller.get('recordButton'), Mojo.Event.tap, this.startCallback);
     //this.audioRecorder.removeEventListener("error", this.handleError, false);
 	this.stopGrapher();
 };
@@ -90,9 +82,34 @@ DetectAssistant.prototype.startCallback = function(event) {
 
 	this.playModel.disabled = true;
 	this.controller.modelChanged(this.playModel);
-	this.controller.get('playButton').mojo.deactivate();
+
+	this.recordModel.disabled = true;
+	this.recordModel.label = "Analyzing...";
+	this.controller.modelChanged(this.recordModel);
+	
+	this.controller.get('spinner').mojo.start();
 
 };
+
+DetectAssistant.prototype.stopCallback = function(event) {
+	this.controller.get('area-to-update1').innerText = 'Recording finished, press play';
+	this.controller.get('spinner').mojo.stop();
+	
+	this.playModel.disabled = false;
+	this.controller.modelChanged(this.playModel);
+
+	this.recordModel.disabled = false;
+	this.recordModel.label = "Go!";
+
+	this.controller.modelChanged(this.recordModel);
+	
+	this.audioRecorder.stopAudioCapture();
+	this.stopGrapher();
+
+	//var filePath = "/media/internal/audio/recording" + this.randomInt +  ".wav";
+	//@TODO: Send file to plugin
+};
+
 function getGraphColor(isRecording){
 	if (isRecording){
 		return "rgb(0, 200, 0)";
@@ -141,7 +158,7 @@ DetectAssistant.prototype.playCallback = function(event) {
 	this.myAudioObj = new Audio();
 	this.myAudioObj.src = /*Mojo.appPath +*/ "/media/internal/audio/recording" + this.randomInt +  ".wav";
 	this.myAudioObj.addEventListener("ended", function(){
-		this.controller.get('playButton').mojo.deactivate();
+		this.controller.get('spinner').mojo.stop();
 	}.bind(this), false);
 	this.myAudioObj.load();
 	this.myAudioObj.play();	

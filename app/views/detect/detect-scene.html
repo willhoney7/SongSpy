@@ -6,8 +6,11 @@
 
 <div class="palm-header-spacer"></div>
  
-<canvas width=300 height=80 style="width: 300px; height: 50px; background: #000000; margin-left: 10px;" id="waveform-canvas"></canvas>
-<br /><br /><br />
-<div x-mojo-element="Button" id="startButton" class="buttonClass" name="startButton"></div>
-<div x-mojo-element="Button" id="playButton" class="buttonClass" name="playButton"></div>  
-<div class="palm-body-text" id='area-to-update1'></div>
+<canvas width=300 height=80 style="width: 300px; height: 50px; background: #000000; margin-left: 10px; display: none" id="waveform-canvas"></canvas>
+
+<div x-mojo-element="Spinner" id="spinner"></div>
+
+<div x-mojo-element="Button" id="recordButton" class="recordButton" name="startButton"></div>
+<div x-mojo-element="Button" id="playButton" style='display:none'class="buttonClass" name="playButton"></div>  
+
+<div class="palm-body-text" style='display:none' id='area-to-update1'></div>
