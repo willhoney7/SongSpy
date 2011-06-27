@@ -39,6 +39,39 @@ body.palm-default {
 	-webkit-animation-timing-function: linear;*/
 }
 
-#spinner {
-	margin: 70px auto;
+.result {
+	width: 80%; 
+	background-color: rgba(255, 255, 255, .3); 
+	-webkit-border-radius: 3px; 
+	padding: 10px; 
+	margin: 10px auto;
+}
+.result .title {
+	font-size: 18px;
+	font-weight: bold;
+	line-height: 20px;
+}
+.result .artist {
+	font-size: 15px;
+	line-height: 16px;
+}
+
+.result .score {
+	font-weight: bold;
+	font-size: 18px;
+}
+.result.green {
+	background-color: rgba(0, 255, 0, .3);
+}
+
+.result.yellow {
+	background-color: rgba(255, 255, 0, .3);
+}
+
+.result.orange {
+	background-color: rgba(255, 100, 0, .3);
+}
+
+.result.red {
+	background-color: rgba(255, 0, 0, .3);
 }

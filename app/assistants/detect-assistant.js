@@ -71,23 +71,26 @@ DetectAssistant.prototype.cleanup = function(event) {
 	this.audioRecorder.unload();	
 };
 DetectAssistant.prototype.startCallback = function(event) {	
-	this.randomInt = Math.floor(Math.random()*99999);
-	this.controller.get('area-to-update1').innerText = 'Recording ...';
-	this.audioRecorder.startAudioCapture(/*Mojo.appPath +*/ "/media/internal/audio/recording" + this.randomInt + ".wav", 
-		{audioCaptureFormat: this.getAudioCaptureFormat()}
-	);
+	if(!this.isWorking){
+		this.isWorking = true;
 
-	setTimeout(this.stopCallback.bind(this), 10000);
-	//new Effect.Pulsate(this.controller.get('recordButton'), {duration: 10});
-	
-	this.startGrapher();
+		this.randomInt = Math.floor(Math.random()*99999);
+		this.controller.get('area-to-update1').innerText = 'Recording ...';
+		this.audioRecorder.startAudioCapture(/*Mojo.appPath +*/ "/media/internal/audio/recording" + this.randomInt + ".wav", 
+			{audioCaptureFormat: this.getAudioCaptureFormat()}
+		);
 
-	this.playModel.disabled = true;
-	this.controller.modelChanged(this.playModel);
+		setTimeout(this.stopCallback.bind(this), 3000);
+		//new Effect.Pulsate(this.controller.get('recordButton'), {duration: 10});
+		
+		this.startGrapher();
 
-	this.controller.get("recordButton").addClassName("recording");
+		this.playModel.disabled = true;
+		this.controller.modelChanged(this.playModel);
 
+		this.controller.get("recordButton").addClassName("recording");
 
+	}
 
 	//this.recordModel.disabled = true;
 	//this.recordModel.label = "Analyzing...";
@@ -98,6 +101,7 @@ DetectAssistant.prototype.startCallback = function(event) {
 };
 
 DetectAssistant.prototype.stopCallback = function(event) {
+
 	this.controller.get('area-to-update1').innerText = 'Recording finished, press play';
 	//this.controller.get('spinner').mojo.stop();
 	
@@ -121,11 +125,14 @@ DetectAssistant.prototype.stopCallback = function(event) {
 
 	//var filePath = "/media/internal/audio/recording" + this.randomInt +  ".wav";
 	//@TODO: Send file to plugin
-	setTimeout(this.gotResponse.bind(this), 10000);
+	setTimeout(this.gotResponse.bind(this), 3000);
 
 };
 
 DetectAssistant.prototype.gotResponse = function(transport){
+
+	this.isWorking = false;
+
 	var transport = {
 	    response: {
 	        status: {
@@ -135,11 +142,35 @@ DetectAssistant.prototype.gotResponse = function(transport){
 	        },
 	        songs: [
 	            {
+	                score: 80,
+	                title: "Assassin",
+	                message: "OK (match type 6)",
+	                artist_id: "AROCZUC1187B9AD05B",
+	                artist_name: "Muse",
+	                id: "SOFUGZY12B0B808249"
+	            },
+	            {
+	                score: 65,
+	                title: "Walk",
+	                message: "OK (match type 6)",
+	                artist_id: "AROCZUC1187B9AD05B",
+	                artist_name: "Foo Fighters",
+	                id: "SOFUGZY12B0B808249"
+	            },
+	            {
 	                score: 48,
 	                title: "Accidents Will Happen",
 	                message: "OK (match type 6)",
 	                artist_id: "AROCZUC1187B9AD05B",
 	                artist_name: "Elvis Costello",
+	                id: "SOFUGZY12B0B808249"
+	            },
+	            {
+	                score: 25,
+	                title: "Accidents Might Happen",
+	                message: "OK (match type 6)",
+	                artist_id: "AROCZUC1187B9AD05B",
+	                artist_name: "My Grandma",
 	                id: "SOFUGZY12B0B808249"
 	            }
 	        ]
