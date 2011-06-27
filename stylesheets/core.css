@@ -1,4 +1,4 @@
-body.palm-default { /*background */
+body.palm-default { 
 	background: url(../images/background.png) top left no-repeat;
 	z-index: -1;
     position: fixed;
@@ -8,10 +8,35 @@ body.palm-default { /*background */
     height: 100%;
 }
 
-.recordButton {
-	position: fixed;
-	bottom: 0px;
-	width: 100%;
+#recordButton {
+	height: 256px;
+	width: 256px;
+	background: url(../images/microphone.png) top left no-repeat;
+	margin: 15px auto;
+}
+#recordButton:active {
+	background: url(../images/microphone_selected.png) top left no-repeat;
+}
+
+#recordButton.analyzing {
+	background: url(../images/microphone_analyzing.png) top left no-repeat;
+}
+
+@-webkit-keyframes recording {
+	from {
+		-webkit-transform: rotate(0deg);
+	}
+	to { 
+		-webkit-transform: rotate(360deg);
+	}
+}
+
+#recordButton.recording {
+	background: url(../images/microphone_recording.png) top left no-repeat;
+	/*-webkit-animation-name: recording;
+	-webkit-animation-duration: 2.0s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-timing-function: linear;*/
 }
 
 #spinner {

@@ -4,22 +4,22 @@ DetectAssistant.prototype.setup = function() {
 	
 	this.gctx = document.getElementById('waveform-canvas').getContext('2d');
 	
-	this.controller.setupWidget("recordButton", 
+	/*this.controller.setupWidget("recordButton", 
 		{},
     	this.recordModel = {
 			label : "Go!",
          	disabled: false,
 		 	buttonClass: 'affirmative'
      	}
-    );
-    this.controller.setupWidget("spinner",
+    );*/
+   /* this.controller.setupWidget("spinner",
 		{
 	    	spinnerSize: "large"
 	  	},
 	  	this.spinnerModel = {
 			spinning: false
 	  	}
-	); 
+	); */
 
 	this.controller.setupWidget("playButton",
         {
@@ -77,46 +77,108 @@ DetectAssistant.prototype.startCallback = function(event) {
 		{audioCaptureFormat: this.getAudioCaptureFormat()}
 	);
 
-	setTimeout(this.stopCallback.bind(this), 5000);
+	setTimeout(this.stopCallback.bind(this), 10000);
+	//new Effect.Pulsate(this.controller.get('recordButton'), {duration: 10});
+	
 	this.startGrapher();
 
 	this.playModel.disabled = true;
 	this.controller.modelChanged(this.playModel);
 
-	this.recordModel.disabled = true;
-	this.recordModel.label = "Analyzing...";
-	this.controller.modelChanged(this.recordModel);
+	this.controller.get("recordButton").addClassName("recording");
+
+
+
+	//this.recordModel.disabled = true;
+	//this.recordModel.label = "Analyzing...";
+	//this.controller.modelChanged(this.recordModel);
 	
-	this.controller.get('spinner').mojo.start();
+	//this.controller.get('spinner').mojo.start();
 
 };
 
 DetectAssistant.prototype.stopCallback = function(event) {
 	this.controller.get('area-to-update1').innerText = 'Recording finished, press play';
-	this.controller.get('spinner').mojo.stop();
+	//this.controller.get('spinner').mojo.stop();
 	
 	this.playModel.disabled = false;
 	this.controller.modelChanged(this.playModel);
 
-	this.recordModel.disabled = false;
-	this.recordModel.label = "Go!";
+	//this.recordModel.disabled = false;
+	//this.recordModel.label = "Go!";
+	//this.controller.modelChanged(this.recordModel);
 
-	this.controller.modelChanged(this.recordModel);
-	
+	this.controller.get("recordButton").removeClassName("recording");
+	this.controller.get("recordButton").addClassName("analyzing");
+	this.controller.get('waveform-canvas').hide();
+	this.controller.get("text-update").show();
+	this.controller.get("text-update").innerHTML = "Analyzing";
+	this.startAnimatingTextUpdate(this.controller.get("text-update"));
+
 	this.audioRecorder.stopAudioCapture();
 	this.stopGrapher();
 
+
 	//var filePath = "/media/internal/audio/recording" + this.randomInt +  ".wav";
 	//@TODO: Send file to plugin
+	setTimeout(this.gotResponse.bind(this), 10000);
+
 };
 
-function getGraphColor(isRecording){
-	if (isRecording){
-		return "rgb(0, 200, 0)";
+DetectAssistant.prototype.gotResponse = function(transport){
+	var transport = {
+	    response: {
+	        status: {
+	            version: "4.2",
+	            code: 0,
+	            message: "Success"
+	        },
+	        songs: [
+	            {
+	                score: 48,
+	                title: "Accidents Will Happen",
+	                message: "OK (match type 6)",
+	                artist_id: "AROCZUC1187B9AD05B",
+	                artist_name: "Elvis Costello",
+	                id: "SOFUGZY12B0B808249"
+	            }
+	        ]
+	    }
 	}
-	else {
-		return "rgb(50, 100, 50)";
+	if(transport.response.status.code === 0){
+		this.controller.stageController.pushScene("song-details", transport.response.songs);
+	} else {
+		bannerError("No Match. Try again.")
 	}
+
+	this.controller.get("recordButton").removeClassName("analyzing");
+	this.controller.get('waveform-canvas').show();
+	this.controller.get("text-update").hide();
+	this.stopAnimatingTextUpdate();
+
+}
+
+DetectAssistant.prototype.startAnimatingTextUpdate = function(div){
+	var innerHTML = div.innerHTML;
+	this.animateTextUpdate = true;
+
+	function addDot(){
+		if(this.animateTextUpdate){
+			div.innerHTML += ".";
+			setTimeout(addDot.bind(this), 500);
+			if(div.innerHTML.length - 4 === innerHTML.length){
+				div.innerHTML = innerHTML;
+			}	
+		} else {
+			div.innerHTML = innerHTML;
+		}
+	}	
+
+	setTimeout(addDot.bind(this), 500);
+}
+
+DetectAssistant.prototype.stopAnimatingTextUpdate = function(div){
+	this.animateTextUpdate = false;
 }
 
 DetectAssistant.prototype.grapher = function(){
@@ -126,14 +188,14 @@ DetectAssistant.prototype.grapher = function(){
 		var height = 80 * vuData.peak[0];
 
 		if (this.gctx){
-			this.gctx.fillStyle = getGraphColor(this.audioRecorder.audioCapture);
+			this.gctx.fillStyle = "rgb(0, 200, 0)";//getGraphColor(this.audioRecorder.audioCapture);
 			this.gctx.fillRect(this.x, 80-height, 4, 80);
 		}
 	}
 
 	this.x+=5;
 	if (this.x == 300) {
-		this.gctx.fillStyle = "rgb(0, 0, 0)"
+		this.gctx.fillStyle = "rgba(0, 0, 0, 0)"
 		this.gctx.clearRect(0, 0, 300, 80);
 		this.x = 0;
 	}
@@ -141,9 +203,9 @@ DetectAssistant.prototype.grapher = function(){
 
 DetectAssistant.prototype.startGrapher = function(){	
 	this.x = 0
-	this.gctx.fillStyle = "rgb(0, 0, 0)"
+	this.gctx.fillStyle = "rgba(0, 0, 0, 0)"
 	this.gctx.clearRect(0, 0, 300, 80);
-	this.gtimer = window.setInterval(this.grapher.bind(this), 100);
+	this.gtimer = window.setInterval(this.grapher.bind(this), 200);
 	
 }
 

@@ -3,5 +3,9 @@
     {
         "scenes": "detect",
         "source": "app/assistants/detect-assistant.js"
+    },
+    {
+        "scenes": "song-details",
+        "source": "app/assistants/song-details-assistant.js"
     }
 ]
